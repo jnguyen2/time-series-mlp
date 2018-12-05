@@ -4,45 +4,43 @@ Contains common functions used with other scripts.
 
 """
 
+
 import datetime
+import csv
 
 
 def read_csv(filename):
     """ Reads a CSV file.
 
     Args:
-        filename (str): Name of the CSV file.
+        filename (str): Name of the file.
 
     Returns:
-        list: List of lists that contain the CSV data.
+        list: Header row.
+        list: Data.
     """
     data = []
-    with open(filename, 'r') as fh:
-        for line in fh:
-            line = line.strip()
-            contents = line.split(',')
-            data.append(contents)
-    return data
+    with open(filename, 'r') as handle:
+        reader = csv.reader(handle)
+        for row in reader:
+            data.append(row)
+    return data[0], data[1:]
 
 
 def write_csv(filename, data):
     """ Writes data to a CSV file.
 
     Args:
-        data (list): List of lists (matrix) containing data.
+        filename (str): Name of the file.
+        data (list): Data.
     """
     with open(filename, 'w') as handle:
-        for row in data:
-            tmp = ''
-            for item in row:
-                tmp += str(item) + ','
-            tmp = tmp[:-1]
-            handle.write(tmp)
-            handle.write('\n')
+        writer = csv.writer(handle)
+        writer.writerows(data)
 
 
 def parse_date(formatted_string):
-    """ Returns a POSIX timestamp of a formatted date-time string. 
+    """ Returns a POSIX timestamp of a formatted date-time string.
     Example: 20140526T0600-0600
 
     Args:
@@ -94,3 +92,22 @@ def filter_data(data, columns):
             tmp.append(row[index])
         result.append(tmp)
     return result
+
+
+def time_series_sample(data, idx, win_size):
+    """ Generates a rolling window time-series sample.
+
+    Args:
+        data (list): Matrix containing data.
+        idx (int): Starting index.
+        win_size (int): Window size.
+
+    Returns:
+    """
+    if idx >= len(data) - win_size:
+        return
+
+    sample = []
+    for i in range(idx, idx + win_size):
+        sample.append(data[i][1])
+    return sample

@@ -10,8 +10,8 @@ def main(args):
         return
 
     file_in = args[1]
-    data = util.read_csv(file_in)
-    data = np.array(data[1:], dtype=float)
+    header, data = util.read_csv(file_in)
+    data = np.array(data, dtype=float)
     plt.plot(data[:, 0], data[:, 1])
     plt.show()
 

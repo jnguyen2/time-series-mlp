@@ -17,12 +17,12 @@ def main(args):
     # command-line arguments
     file_in = sys.argv[1]
     file_out = sys.argv[2]
-    data = util.read_csv(file_in)
+
+    # read in data
+    header, data = util.read_csv(file_in)
 
     # convert formatted timestamps to posix timestamps
-    header = data[0]
     header.append('posix')
-    data = data[1:]
     date_idx = header.index('datetime')
     for i in range(len(data)):
         date = data[i][date_idx]
@@ -39,19 +39,30 @@ def main(args):
     columns = [posix_index, ppm_index]
     data = util.filter_data(data, columns)
 
+    # add data that matches interval
     new_data = []
     new_data.append(data[0])
-    prev_val = data[0][0]
+    prev_time = data[0][0]
+    prev_val = data[0][1]
     interval = 3600
-    for i in range(1, len(data)):
-        if (prev_val + interval - data[i][0]) % interval == 0:
+    i = 1
+    while i < len(data):
+        new_time = prev_time + interval
+        if new_time == data[i][0]:
             new_data.append(data[i])
-            prev_val = data[i][0]
+            prev_time = data[i][0]
+            prev_val = data[i][1]
+            i += 1
+        else:
+            new_data.append([new_time, prev_val])
+            prev_time = new_time
 
     # write csv to file with header
     header = ['time', 'ppm']
     new_data.insert(0, header)
-    util.write_csv(file_out, new_data)
+
+    # write new file
+    util.write_csv(file_out, data)
 
 
 if __name__ == '__main__':
