@@ -57,8 +57,8 @@ new_data = []
 for i in range(len(data) - win_size):
     timestamp = data[i + win_size][0]
     sample = util.time_series_sample(data, i, win_size)
-    sample = np.reshape(np.array(sample, dtype=float)[:-1], (1, -1))
-    row = [timestamp, reg.predict(sample)[0]]
+    sample = np.reshape(np.array(sample, dtype=float), (1, -1))
+    row = [timestamp, reg.predict(sample[:, :-1])[0]]
     new_data.append(row)
 
 new_data.insert(0, header)

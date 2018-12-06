@@ -22,8 +22,9 @@ nhiddone = int(sys.argv[5])
 nhiddtwo = int(sys.argv[6])
 early_stop = True if sys.argv[7] == '1' else False
 
-data = np.loadtxt(train_file, dtype=float, delimiter=',')
+data = np.loadtxt(train_file, delimiter=',')
 
+# train mlp for specified number of iterations
 total_rmse = 0.0
 total_accuracy = 0.0
 for _ in range(iterations):
@@ -56,14 +57,16 @@ for _ in range(iterations):
 print('RMSE:', total_rmse / iterations)
 print('R^2:', total_accuracy / iterations)
 
-header, data = util.read_csv(actual_file)
+# predict on actual file
+data = np.loadtxt(actual_file, delimiter=',')
 new_data = []
 for i in range(len(data) - win_size):
     timestamp = data[i + win_size][0]
     sample = util.time_series_sample(data, i, win_size)
-    sample = np.reshape(np.array(sample, dtype=float)[:-1], (1, -1))
-    row = [timestamp, mlp.predict(sample)[0]]
+    sample = np.reshape(np.array(sample, dtype=float), (1, -1))
+    row = [timestamp, mlp.predict(sample[:, :-1])[0]]
     new_data.append(row)
+new_data = np.array(new_data)
 
-new_data.insert(0, header)
-util.write_csv(output_file, new_data)
+np.savetxt(output_file, new_data, header='mlp predicted', delimiter=',',
+           fmt='%.4f')

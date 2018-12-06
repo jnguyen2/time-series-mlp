@@ -4,10 +4,12 @@ This script cleans up the original AQDM data file.
 
 """
 import sys
+import csv
+import numpy as np
 import util
 
 if len(sys.argv) < 3:
-    print('Usage: python3 %s' % sys.argv[0], '<csv-in> <csv-out>')
+    print('Usage: python3 %s' % sys.argv[0], '<input-file> <output-file>')
     sys.exit(1)
 
 # command-line arguments
@@ -15,7 +17,13 @@ file_in = sys.argv[1]
 file_out = sys.argv[2]
 
 # read in data
-header, data = util.read_csv(file_in)
+data = []
+with open(file_in, 'r') as handle:
+    reader = csv.reader(handle)
+    for row in reader:
+        data.append(row)
+header = data[0]
+data = data[1:]
 
 # convert formatted timestamps to posix timestamps
 header.append('posix')
@@ -30,12 +38,12 @@ data = sorted(data, key=lambda sample: sample[-1])
 util.delete_duplicates(data, -1)
 
 # remove unused columns
-posix_index = header.index('posix')
-ppm_index = header.index('value')
-columns = [posix_index, ppm_index]
+posix_idx = header.index('posix')
+ppm_idx = header.index('value')
+columns = [posix_idx, ppm_idx]
 data = util.filter_data(data, columns)
 
-# add data that matches interval
+# fill in new data
 new_data = []
 new_data.append(data[0])
 prev_time = data[0][0]
@@ -49,11 +57,11 @@ while i < len(data):
         prev_time = data[i][0]
         prev_val = data[i][1]
         i += 1
-    else:
+    else:  # handling missing values
         new_data.append([new_time, prev_val])
         prev_time = new_time
 
 # write data with header
-header = ['time', 'ppm']
-new_data.insert(0, header)
-util.write_csv(file_out, new_data)
+new_data = np.array(new_data, dtype=float)
+np.savetxt(file_out, new_data, header='preprocessed',
+           delimiter=',', fmt='%.4f')

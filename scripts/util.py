@@ -4,37 +4,7 @@ Contains common functions used with other scripts.
 
 """
 import datetime
-import csv
-
-
-def read_csv(filename):
-    """ Reads a CSV file.
-
-    Args:
-        filename (str): Name of the file.
-
-    Returns:
-        list: Header row.
-        list: Data.
-    """
-    data = []
-    with open(filename, 'r') as handle:
-        reader = csv.reader(handle)
-        for row in reader:
-            data.append(row)
-    return data[0], data[1:]
-
-
-def write_csv(filename, data):
-    """ Writes data to a CSV file.
-
-    Args:
-        filename (str): Name of the file.
-        data (list): Data.
-    """
-    with open(filename, 'w') as handle:
-        writer = csv.writer(handle)
-        writer.writerows(data)
+import numpy as np
 
 
 def parse_date(formatted_string):
@@ -96,7 +66,7 @@ def time_series_sample(data, idx, win_size):
     """ Generates a rolling window time-series sample.
 
     Args:
-        data (list): Matrix containing data.
+        data (np.array): Matrix containing data.
         idx (int): Starting index.
         win_size (int): Window size.
 
@@ -105,7 +75,7 @@ def time_series_sample(data, idx, win_size):
     if idx >= len(data) - win_size:
         return
 
-    sample = []
+    sample = np.zeros(win_size, dtype=float)
     for i in range(idx, idx + win_size):
-        sample.append(data[i][1])
+        sample[i - idx] = data[i, 1]
     return sample
