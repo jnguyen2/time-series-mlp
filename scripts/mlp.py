@@ -41,7 +41,7 @@ for _ in range(iterations):
     test_targets = test_data[:, -1]
 
     mlp = MLPRegressor(hidden_layer_sizes=(nhiddone, nhiddtwo),
-                       activation='relu', early_stopping=early_stop, tol=0.01,
+                       activation='logistic', early_stopping=early_stop,
                        max_iter=1000)
     mlp = mlp.fit(train_inputs, train_targets)
 
@@ -60,9 +60,9 @@ header, data = util.read_csv(actual_file)
 new_data = []
 for i in range(len(data) - win_size):
     timestamp = data[i + win_size][0]
-    sample = util.time_series_sample(data, i, win_size - 1)
-    sample = np.reshape(np.array(sample, dtype=float), (1, -1))
-    row = [timestamp, mlp.predict(sample)]
+    sample = util.time_series_sample(data, i, win_size)
+    sample = np.reshape(np.array(sample, dtype=float)[:-1], (1, -1))
+    row = [timestamp, mlp.predict(sample)[0]]
     new_data.append(row)
 
 new_data.insert(0, header)
