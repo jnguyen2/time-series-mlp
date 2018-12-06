@@ -3,8 +3,6 @@
 Contains common functions used with other scripts.
 
 """
-
-
 import datetime
 import csv
 

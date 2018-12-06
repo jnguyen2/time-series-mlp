@@ -3,18 +3,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import util
 
+if len(sys.argv) < 2:
+    print('Usage: python3 %s <csv-in> <csv-in>' % sys.argv[0])
+    sys.exit(1)
 
-def main(args):
-    if len(args) < 2:
-        print('Usage: python3 plot.py <csv-in>')
-        return
+file_in = sys.argv[1]
+file_in_two = sys.argv[2]
+header, data = util.read_csv(file_in)
+data = np.array(data, dtype=float)
 
-    file_in = args[1]
-    header, data = util.read_csv(file_in)
-    data = np.array(data, dtype=float)
-    plt.plot(data[:, 0], data[:, 1])
-    plt.show()
+header, data_two = util.read_csv(file_in_two)
+data_two = np.array(data, dtype=float)
 
-
-if __name__ == '__main__':
-    main(sys.argv)
+plt.plot(data[:, 0], data[:, 1])
+plt.plot(data_two[:, 0], data[:, 1])
+plt.show()
