@@ -11,7 +11,7 @@ import util
 
 warnings.filterwarnings('ignore')
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 5:
     print('Usage: python3', sys.argv[0], '<train-file> <actual-file>',
           '<output-file> <iterations>')
     sys.exit(1)
@@ -22,8 +22,7 @@ output_file = sys.argv[3]
 iterations = int(sys.argv[4])
 
 # read in data
-header, data = util.read_csv(train_file)
-data = np.array(data, dtype=float)
+data = np.loadtxt(train_file, delimiter=',')
 win_size = np.shape(data)[1]
 test_idx = np.shape(data)[0] - 2 * (np.shape(data)[0] // 10)
 
@@ -52,7 +51,7 @@ for _ in range(iterations):
 print('RMSE:', total_rmse / iterations)
 print('R^2:', total_accuracy / iterations)
 
-header, data = util.read_csv(actual_file)
+data = np.loadtxt(actual_file, delimiter=',')
 new_data = []
 for i in range(len(data) - win_size):
     timestamp = data[i + win_size][0]
@@ -60,6 +59,6 @@ for i in range(len(data) - win_size):
     sample = np.reshape(np.array(sample, dtype=float), (1, -1))
     row = [timestamp, reg.predict(sample[:, :-1])[0]]
     new_data.append(row)
-
-new_data.insert(0, header)
-util.write_csv(output_file, new_data)
+new_data = np.array(new_data)
+np.savetxt(output_file, new_data, header='regression', delimiter=',',
+           fmt='%.4f')

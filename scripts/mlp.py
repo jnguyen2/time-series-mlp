@@ -8,9 +8,9 @@ import util
 import numpy as np
 from sklearn.neural_network import MLPRegressor
 
-if len(sys.argv) < 8:
+if len(sys.argv) < 7:
     print('Usage: python3 %s' % sys.argv[0], '<training-file> <actual-file>',
-          '<output-file> <iterations> <hidden-one> <hidden-two> <activation>')
+          '<output-file> <iterations> <hidden-nodes> <activation>')
     sys.exit(1)
 
 train_file = sys.argv[1]
@@ -18,8 +18,7 @@ actual_file = sys.argv[2]
 output_file = sys.argv[3]
 iterations = int(sys.argv[4])
 nhiddone = int(sys.argv[5])
-nhiddtwo = int(sys.argv[6])
-act_func = sys.argv[7]
+act_func = sys.argv[6]
 
 data = np.loadtxt(train_file, delimiter=',')
 
@@ -40,7 +39,7 @@ for _ in range(iterations):
     test_inputs = test_data[:, :-1]
     test_targets = test_data[:, -1]
 
-    mlp = MLPRegressor(hidden_layer_sizes=(nhiddone, nhiddtwo),
+    mlp = MLPRegressor(hidden_layer_sizes=(nhiddone,),
                        activation=act_func, early_stopping=True,
                        max_iter=9999999)
     mlp = mlp.fit(train_inputs, train_targets)
