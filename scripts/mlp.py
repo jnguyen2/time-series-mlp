@@ -13,6 +13,7 @@ if len(sys.argv) < 7:
           '<output-file> <iterations> <hidden-nodes> <activation>')
     sys.exit(1)
 
+# command line arguments
 train_file = sys.argv[1]
 actual_file = sys.argv[2]
 output_file = sys.argv[3]
@@ -52,17 +53,19 @@ for _ in range(iterations):
     total_rmse += rmse
     total_accuracy += accuracy
 
+# print results on test set
 print('RMSE:', total_rmse / iterations)
 print('R^2:', total_accuracy / iterations)
 
 # predict on actual file
 data = np.loadtxt(actual_file, delimiter=',')
 new_data = []
+win_size -= 1
 for i in range(len(data) - win_size):
     timestamp = data[i + win_size][0]
-    sample = util.time_series_sample(data, i, win_size)
-    sample = np.reshape(np.array(sample, dtype=float), (1, -1))
-    row = [timestamp, mlp.predict(sample[:, :-1])[0]]
+    sample = util.time_series_sample(data, i, win_size)[:-1]
+    sample = np.reshape(sample, (1, -1))
+    row = [timestamp, mlp.predict(sample)[0]]
     new_data.append(row)
 new_data = np.array(new_data)
 

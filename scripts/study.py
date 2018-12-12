@@ -3,61 +3,34 @@
 This script automates the collection of data for the MLP.
 
 """
+import sys
 import subprocess
 
-# preprocess the data
-args = ['python3', 'preprocess.py', '../data/AQDM_raw.csv', '../data/AQDM_pp']
-subprocess.run(args)
+if len(sys.argv) < 4:
+    print('Usage: python3', sys.argv[0], '<train-file> <actual-file>',
+          '<summary-file>')
+    sys.exit(1)
 
-# normalize the data
-args = ['python3', 'normalize.py', '../data/AQDM_pp', '../data/AQDM_hourly']
-subprocess.run(args)
+train_file = sys.argv[1]
+actual_file = sys.argv[2]
+summary_file = sys.argv[3]
 
-# data per day
-args = ['python3', 'pick_interval.py', '../data/AQDM_hourly',
-        '../data/AQDM_daily', '86400']
-subprocess.run(args)
+hidd_sizes = ['500', '1000', '1500', '2000']
+act_funcs = ['identity', 'logistic', 'tanh', 'relu']
+data = []
+for func in act_funcs:
+    print('Testing %s...' % func)
+    for hidd in hidd_sizes:
+        print('\tTesting %s...' % hidd)
+        args = ['python3', 'mlp.py', train_file, actual_file,
+                train_file + '_%s_%s' % (hidd, func), '10', hidd, func]
+        proc = subprocess.run(args, stdout=subprocess.PIPE)
+        stdout = proc.stdout.decode('UTF-8')
+        stdout = stdout.split()
+        r2 = float(stdout[3])
+        data.append('%s,%s,%.4f' % (func, hidd, r2))
 
-# data per week
-args = ['python3', 'pick_interval.py', '../data/AQDM_hourly',
-        '../data/AQDM_weekly', '604800']
-subprocess.run(args)
-
-# create training data
-args = ['python3', 'generate_window.py', '../data/AQDM_hourly',
-        '../data/AQDM_hourly_train', '24']
-subprocess.run(args)
-
-args = ['python3', 'generate_window.py', '../data/AQDM_daily',
-        '../data/AQDM_daily_train', '7']
-subprocess.run(args)
-
-args = ['python3', 'generate_window.py', '../data/AQDM_weekly',
-        '../data/AQDM_weekly_train', '4']
-subprocess.run(args)
-
-print('Training data created.')
-print()
-
-hidd_sizes = ['50', '100', '250', '500', '1000', '1500']
-for hidd in hidd_sizes:
-    print('Testing', hidd, 'hidden nodes.')
-    args = ['python3', 'mlp.py', '../data/AQDM_daily_train',
-            '../data/AQDM_daily', '../data/daily_mlp_identity_' + hidd, '50',
-            hidd, 'identity']
-    subprocess.run(args)
-    print()
-
-for hidd in hidd_sizes:
-    print('Testing', hidd, 'hidden nodes.')
-    args = ['python3', 'mlp.py', '../data/AQDM_daily_train',
-            '../data/AQDM_daily', '../data/daily_mlp_identity_' + hidd, '50',
-            hidd, 'identity']
-    subprocess.run(args)
-    print()
-
-# mlp performance with different activation functions
-
-# mlp performance with different number of hidden nodes
-
-# regression performance on similar data sets
+with open(summary_file, 'w') as fh:
+    for row in data:
+        fh.write(row)
+        fh.write('\n')

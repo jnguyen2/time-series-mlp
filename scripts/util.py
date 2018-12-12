@@ -75,7 +75,7 @@ def time_series_sample(data, idx, win_size):
     if idx >= len(data) - win_size:
         return
 
-    sample = np.zeros(win_size, dtype=float)
+    sample = np.ones(win_size + 1, dtype=float)
     for i in range(idx, idx + win_size):
-        sample[i - idx] = data[i, 1]
+        sample[(i - idx) + 1] = data[i, 1]
     return sample
